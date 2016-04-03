@@ -2,6 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { Link } from 'react-router'
 import { fetchAlbumIfNeeded } from '../actions/album'
+import LazyImage from './lazy_image'
 
 export default class Album extends React.Component {
   itemUrl(item) {
@@ -26,7 +27,7 @@ export default class Album extends React.Component {
           {items.map((item, i) =>
             <li key={i}>
               <Link to={itemUrl(item)}>
-                <img src={item.thumbnailUrl} />
+                <LazyImage src={item.thumbnailUrl} />
               </Link>
             </li>
           )}
