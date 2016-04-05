@@ -1,17 +1,42 @@
 import fetch from 'isomorphic-fetch'
 
-export const REQUEST_ALBUMS = 'REQUEST_ALBUMS'
-export const RECEIVE_ALBUMS = 'RECEIVE_ALBUMS'
+const REQUEST = 'albums/REQUEST'
+const RECEIVE = 'albums/RECEIVE'
+
+const initialState = {
+  isFetching:    false,
+  didInvalidate: true,
+  albums:        []
+}
+
+export default function reducer(state = initialState, action) {
+  switch (action.type) {
+    case REQUEST:
+      return Object.assign({}, state, {
+        isFetching:    true,
+        didInvalidate: false
+      })
+    case RECEIVE:
+      return Object.assign({}, state, {
+        isFetching:    false,
+        didInvalidate: false,
+        albums:        action.albums,
+        lastUpdated:   action.receivedAt
+      })
+    default:
+      return state
+  }
+}
 
 function requestAlbums() {
   return {
-    type: REQUEST_ALBUMS
+    type: REQUEST
   }
 }
 
 function receiveAlbums(json) {
   return {
-    type: RECEIVE_ALBUMS,
+    type: RECEIVE,
     albums: json.albums,
     receivedAt: Date.now()
   }

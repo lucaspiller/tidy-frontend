@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { Link } from 'react-router'
-import { fetchAlbumIfNeeded } from '../actions/album'
+import { fetchSelectedAlbumIfNeeded } from '../ducks/selectedAlbum'
 import LazyImage from './lazy_image'
 
 export default class Album extends React.Component {
@@ -12,7 +12,7 @@ export default class Album extends React.Component {
   componentDidMount() {
     const { dispatch } = this.props
     const albumId = this.props.params.albumId
-    dispatch(fetchAlbumIfNeeded(albumId))
+    dispatch(fetchSelectedAlbumIfNeeded(albumId))
   }
 
   render() {
@@ -50,7 +50,6 @@ Album.propTypes = {
 }
 
 function mapStateToProps(state, ownProps) {
-  const { albumsById } = state
   const albumId = ownProps.params.albumId
 
   const {
@@ -58,12 +57,10 @@ function mapStateToProps(state, ownProps) {
     lastUpdated,
     name,
     items,
-  } = state.albumsById[albumId] || {
+  } = state.selectedAlbum || {
     isFetching: true,
     items: []
   }
-
-  console.log('mapStateToProps', albumId, name, items, isFetching, lastUpdated)
 
   return {
     name,

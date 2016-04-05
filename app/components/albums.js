@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { Link } from 'react-router'
-import { fetchAlbumsIfNeeded } from '../actions/albums'
+import { fetchAlbumsIfNeeded } from '../ducks/albums'
 
 export default class Albums extends React.Component {
   albumUrl(album) {
@@ -48,10 +48,10 @@ function mapStateToProps(state) {
   const {
     isFetching,
     lastUpdated,
-    items: albums
+    albums: albums
   } = state.albums || {
     isFetching: true,
-    items: []
+    albums: []
   }
 
   return {
