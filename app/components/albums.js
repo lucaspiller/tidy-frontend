@@ -2,64 +2,81 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { Link } from 'react-router'
 import { fetchAlbumsIfNeeded } from '../ducks/albums'
+import { albumsGroupedByYear } from '../selectors/albums'
+import LazyImage from './lazy_image'
 
 export default class Albums extends React.Component {
-  albumUrl(album) {
-    return `/albums/${album.id}`
-  }
-
   componentDidMount() {
     const { dispatch } = this.props
     dispatch(fetchAlbumsIfNeeded())
   }
 
   render() {
-    const { albums } = this.props
-    const albumUrl = this.albumUrl
-
     return (
       <div>
         <h1>Albums</h1>
 
-        <ul>
-          {albums.map((album, i) =>
-            <li key={i}>
-              <Link to={albumUrl(album)}>{album.name}</Link>
-            </li>
-          )}
-        </ul>
+        {this.props.albumsByYear.map(this.renderYear.bind(this))}
 
         <p>
-          {albums.length} album(s)
+          {this.props.albums.length} album(s)
         </p>
+      </div>
+    )
+  }
+
+  albumUrl(album) {
+    return `/albums/${album.id}`
+  }
+
+  previewImage(album) {
+    return `/api/albums/${album.id}/thumb`
+  }
+
+  renderYear(yearAlbums, i) {
+    const { year, albums } = yearAlbums
+    return (
+      <div key={i}>
+        <h1>{year}</h1>
+        {albums.map(this.renderAlbum.bind(this))}
+      </div>
+    )
+  }
+
+  renderAlbum(album, i) {
+    const url = this.albumUrl(album)
+    const previewUrl = this.previewImage(album)
+    const {name, itemsCount, minDate, maxDate} = album;
+
+    return (
+      <div key={i}>
+        <Link to={url}>
+          <LazyImage src={previewUrl} />
+          {name}
+          <div>
+            {itemsCount} items
+          </div>
+          <div>
+            {minDate} - {maxDate}
+          </div>
+        </Link>
       </div>
     )
   }
 }
 
 Albums.propTypes = {
-  albums:      React.PropTypes.array.isRequired,
-  isFetching:  React.PropTypes.bool.isRequired,
-  lastUpdated: React.PropTypes.number,
-  dispatch:    React.PropTypes.func.isRequired
+  albumsByYear: React.PropTypes.array.isRequired,
+  albums:       React.PropTypes.array.isRequired,
+  dispatch:     React.PropTypes.func.isRequired
 }
 
 function mapStateToProps(state) {
-  const {
-    isFetching,
-    lastUpdated,
-    albums: albums
-  } = state.albums || {
-    isFetching: true,
-    albums: []
-  }
-
+  const albums = state.albums.albums
   return {
-    albums,
-    isFetching,
-    lastUpdated
+    albumsByYear: albumsGroupedByYear(albums),
+    albums:       albums
   }
-
 }
 
 export default connect(mapStateToProps)(Albums)
