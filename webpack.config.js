@@ -1,6 +1,5 @@
 'use strict';
-const path              = require('path');
-const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const path              = require('path')
 
 module.exports = {
   output: {
@@ -14,13 +13,10 @@ module.exports = {
   devtool: 'inline-source-map',
 
   entry: [
-    path.resolve(__dirname, 'app', 'main.js')
-    //'webpack-dev-server/client?http://0.0.0.0:3001', // WebpackDevServer host and port
-    //'webpack/hot/only-dev-server'
-  ],
-
-  plugins: [
-    new ExtractTextPlugin("application.css")
+    path.resolve(__dirname, 'app', 'main.js'),
+    path.resolve(__dirname, 'app', 'stylesheets', 'main.scss'),
+    'webpack-dev-server/client?http://0.0.0.0:3001', // WebpackDevServer host and port
+    'webpack/hot/only-dev-server'
   ],
 
   resolve: {
@@ -36,11 +32,11 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        loader: ExtractTextPlugin.extract('style-loader', 'css-loader')
+        loaders: ['style', 'css']
       },
       {
         test: /\.scss$/,
-        loader: ExtractTextPlugin.extract('style-loader', 'css-loader!sass-loader')
+        loaders: ['style', 'css', 'sass']
       },
       {
         test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
