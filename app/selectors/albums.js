@@ -6,7 +6,7 @@ export function albumsSortedByDate(albums) {
     album.sortDate = Date.parse(album.maxDate)
     return album
   }).sort(function(a, b) {
-    return a.sortDate - b.sortDate
+    return b.sortDate - a.sortDate
   })
 }
 
@@ -22,22 +22,20 @@ export function albumsSortedByDate(albums) {
 //
 export function albumsGroupedByYear(albums) {
   let years = []
+
   albumsSortedByDate(albums).forEach(function(album) {
     const year = new Date(album.sortDate).getFullYear()
     if (years[year] == undefined) {
       years[year] = []
     }
+
     years[year].push(album)
   })
 
-  years = years.map(function(albums, year) {
+  return years.map(function(albums, year) {
     return {
       year:   year,
       albums: albums
     }
-  }).sort(function(a, b) {
-    return b.year - a.year
-  })
-
-  return years;
+  }).reverse()
 }

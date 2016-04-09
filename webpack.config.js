@@ -1,5 +1,7 @@
 'use strict';
-const path              = require('path')
+
+const path    = require('path')
+const webpack = require('webpack')
 
 module.exports = {
   output: {
@@ -17,6 +19,10 @@ module.exports = {
     path.resolve(__dirname, 'app', 'stylesheets', 'main.scss'),
     'webpack-dev-server/client?http://0.0.0.0:3001', // WebpackDevServer host and port
     'webpack/hot/only-dev-server'
+  ],
+
+  plugins: [
+    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)
   ],
 
   resolve: {

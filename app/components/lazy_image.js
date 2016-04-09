@@ -35,25 +35,22 @@ export default class LazyImage extends React.Component {
     }
 
     const rect = element.getBoundingClientRect()
-
-    const visible = rect.top >= 0 &&
-      rect.left >= 0 &&
-      rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-      rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-
+    const height = rect.bottom - rect.top
+    const visible = rect.bottom - height <= (window.innerHeight || document.documentElement.clientHeight)
     return visible
   }
 
   render() {
     const { src, width, height } = this.props
     const { shown } = this.state
+    let style = {}
+
+    if (shown) {
+      style.backgroundImage = `url("${src}")`
+    }
 
     return (
-      <div width={width} height={height}>
-        { shown ? (
-        <img src={src} />
-        ) : '' }
-      </div>
+      <div className="image" width={width} height={height} style={style} />
     )
   }
 }
