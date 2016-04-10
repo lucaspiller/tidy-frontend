@@ -4,6 +4,7 @@ import { Link } from 'react-router'
 import partition from 'linear-partitioning'
 import chunk from 'lodash/chunk'
 import { fetchSelectedAlbumIfNeeded } from '../ducks/selectedAlbum'
+import { itemsSortedByDate } from '../selectors/items'
 import LazyImage from './lazy_image'
 
 export default class Album extends React.Component {
@@ -29,7 +30,8 @@ export default class Album extends React.Component {
   }
 
   render() {
-    const { name, items } = this.props.album
+    const { name } = this.props.album
+    const items = this.props.items
     const _this = this
 
     return (
@@ -98,15 +100,17 @@ export default class Album extends React.Component {
 }
 
 Album.propTypes = {
-  album:       React.PropTypes.object.isRequired,
-  dispatch:    React.PropTypes.func.isRequired
+  album:    React.PropTypes.object.isRequired,
+  items:    React.PropTypes.array.isRequired,
+  dispatch: React.PropTypes.func.isRequired
 }
 
 function mapStateToProps(state) {
   const selectedAlbum = state.selectedAlbum
 
   return {
-    album: selectedAlbum
+    album: selectedAlbum,
+    items: itemsSortedByDate(selectedAlbum.items)
   }
 }
 
