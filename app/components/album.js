@@ -1,6 +1,8 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { Link } from 'react-router'
+import partition from 'linear-partitioning'
+import chunk from 'lodash/chunk'
 import { fetchSelectedAlbumIfNeeded } from '../ducks/selectedAlbum'
 import LazyImage from './lazy_image'
 
@@ -13,25 +15,30 @@ export default class Album extends React.Component {
     const { dispatch } = this.props
     const albumId = this.props.params.albumId
     dispatch(fetchSelectedAlbumIfNeeded(albumId))
+
+    this.resize = () => {
+      this.setState({
+        width: window.innerWidth
+      })
+    }
+    window.addEventListener('resize', this.resize)
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.resize)
   }
 
   render() {
-    const { name, items } = this.props
-    const itemUrl = this.itemUrl
+    const { name, items } = this.props.album
+    const _this = this
 
     return (
-      <div>
+      <div className="album-component">
         <h1>{name}</h1>
 
-        <ul>
-          {items.map((item, i) =>
-            <li key={i}>
-              <Link to={itemUrl(item)}>
-                <LazyImage src={item.thumbnailUrl} />
-              </Link>
-            </li>
-          )}
-        </ul>
+        <div className="item-list">
+          {chunk(items, 500).map(function(chunk) { return _this.renderItems(chunk) })}
+        </div>
 
         <p>
           {items.length} items(s)
@@ -39,36 +46,68 @@ export default class Album extends React.Component {
       </div>
     )
   }
+
+  renderItems(items) {
+    if (items.length == 0) {
+      return
+    }
+
+    const defaultRatio = 1
+
+    const viewportWidth = window.innerWidth
+    const idealHeight = Math.ceil(window.innerHeight / 3.5)
+    const summedWidth = items.reduce((sum, item) => {
+      return sum + item.aspectRatio * idealHeight
+    }, 0)
+    const rows = Math.ceil(summedWidth / viewportWidth)
+
+    const weights = items.map((item) => {
+      return item.aspectRatio || defaultRatio
+    })
+
+    const partitions = partition(weights, rows)
+
+    let index = 0
+    return partitions.map((row) => {
+      const summedRatio = row.reduce((sum, ratio) => sum + ratio)
+      return row.map(() => {
+        const item = items[index++]
+        const ratio = item.aspectRatio || defaultRatio
+        const width = (viewportWidth / summedRatio) * ratio
+        const height = width / ratio
+        return this.renderItem(item, index, width, height)
+      })
+    })
+  }
+
+  renderItem(item, i, width, height) {
+    const url = this.itemUrl(item)
+    const thumbnailUrl = item.thumbnailUrl
+    const style = {
+      width: width,
+      height: height
+    }
+    return (
+      <div className="item" key={i} style={style}>
+        <Link to={url}>
+          <LazyImage src={thumbnailUrl} />
+        </Link>
+      </div>
+    )
+  }
 }
 
 Album.propTypes = {
-  name:        React.PropTypes.string,
-  items:       React.PropTypes.array.isRequired,
-  isFetching:  React.PropTypes.bool.isRequired,
-  lastUpdated: React.PropTypes.number,
+  album:       React.PropTypes.object.isRequired,
   dispatch:    React.PropTypes.func.isRequired
 }
 
-function mapStateToProps(state, ownProps) {
-  const albumId = ownProps.params.albumId
-
-  const {
-    isFetching,
-    lastUpdated,
-    name,
-    items,
-  } = state.selectedAlbum || {
-    isFetching: true,
-    items: []
-  }
+function mapStateToProps(state) {
+  const selectedAlbum = state.selectedAlbum
 
   return {
-    name,
-    items,
-    isFetching,
-    lastUpdated
+    album: selectedAlbum
   }
-
 }
 
 export default connect(mapStateToProps)(Album)

@@ -1,0 +1,23 @@
+.album-component {
+  .item-list {
+    .item {
+      float: left;
+      width: 100%;
+      height: 100%;
+      padding: 2px;
+
+      a {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      .image {
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+      }
+    }
+  }
+}
