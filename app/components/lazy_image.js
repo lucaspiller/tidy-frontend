@@ -10,18 +10,17 @@ export default class LazyImage extends React.Component {
   }
 
   componentDidMount() {
-    window.addEventListener('scroll', this.updateShownState.bind(this))
+    this.updateShownState = () => {
+      this.setState({
+        shown: this.isShown()
+      })
+    }
+    window.addEventListener('scroll', this.updateShownState)
     this.updateShownState()
   }
 
   componentWillUnmount() {
-    window.removeEventListener('scroll', this.updateShownState.bind(this))
-  }
-
-  updateShownState() {
-    this.setState({
-      shown: this.isShown()
-    })
+    window.removeEventListener('scroll', this.updateShownState)
   }
 
   isShown() {
@@ -36,7 +35,9 @@ export default class LazyImage extends React.Component {
 
     const rect = element.getBoundingClientRect()
     const height = rect.bottom - rect.top
-    const visible = rect.bottom - height <= (window.innerHeight || document.documentElement.clientHeight)
+    // we multiply the height by 2 so hopefully images can be loaded before
+    // they are scrolled into view
+    const visible = rect.bottom - height <= (window.innerHeight || document.documentElement.clientHeight) * 2
     return visible
   }
 
