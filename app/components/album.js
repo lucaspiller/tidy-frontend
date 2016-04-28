@@ -8,8 +8,8 @@ import { itemsSortedByDate } from '../selectors/items'
 import LazyImage from './lazy_image'
 
 export default class Album extends React.Component {
-  itemUrl(item) {
-    return `/items/${item.id}`
+  itemUrl(albumId, item) {
+    return `/albums/${albumId}/items/${item.id}`
   }
 
   componentDidMount() {
@@ -83,7 +83,8 @@ export default class Album extends React.Component {
   }
 
   renderItem(item, i, width, height) {
-    const url = this.itemUrl(item)
+    const albumId      = this.props.album.id
+    const url          = this.itemUrl(albumId, item)
     const thumbnailUrl = item.thumbnailUrl
     const style = {
       width: width,

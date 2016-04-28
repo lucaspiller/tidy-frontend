@@ -6,6 +6,7 @@ import configureStore from './configureStore'
 
 import Albums from './components/albums'
 import Album from './components/album'
+import Item from './components/item'
 
 const store = configureStore()
 
@@ -26,6 +27,7 @@ ReactDOM.render((
       <Route path="/" component={Home} />
       <Route path="/albums" component={Albums} />
       <Route path="/albums/:albumId" component={Album} />
+      <Route path="/albums/:albumId/items/:itemId" component={Item} />
     </Router>
   </Provider>
 ), document.getElementById('app'))
