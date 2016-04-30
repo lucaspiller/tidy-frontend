@@ -2,12 +2,24 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { Link } from 'react-router'
 import { fetchSelectedItemIfNeeded } from '../ducks/selectedItem'
+import ItemMenu from './item_menu'
 
 export default class Item extends React.Component {
   componentDidMount() {
     const { dispatch } = this.props
     const itemId = this.props.params.itemId
     dispatch(fetchSelectedItemIfNeeded(itemId))
+  }
+
+  returnUrl() {
+    const albumId = this.props.params.albumId
+    return `/albums/${albumId}`
+  }
+
+  infoUrl() {
+    const albumId = this.props.params.albumId
+    const itemId = this.props.params.itemId
+    return `/albums/${albumId}/items/${itemId}/info`
   }
 
   imgSrc(item) {
@@ -36,14 +48,27 @@ export default class Item extends React.Component {
   }
 
   render() {
-    const { id } = this.props.item
-    const src = this.imgSrc(this.props.item)
+    const item = this.props.item
+    const src  = this.imgSrc(item)
+    const returnUrl = this.returnUrl()
+    const infoUrl   = this.infoUrl()
+
+    let className = "item-component"
+    if (this.props.children) {
+      className += " overlay"
+    }
 
     return (
-      <div className="item-component">
+      <div className={className}>
         <div id="item">
           <img src={src} />
         </div>
+        <ItemMenu
+          item={item}
+          returnUrl={returnUrl}
+          infoUrl={infoUrl}
+        />
+        {this.props.children}
       </div>
     )
   }

@@ -1,0 +1,60 @@
+@import 'base/variables';
+
+.item-menu-component {
+  .top-menu, .bottom-menu {
+    z-index: 999;
+    position: absolute;
+    left: 0;
+
+    width: 100%;
+    text-align: center;
+    color: #eee;
+
+    padding: 1em;
+
+    a {
+      color: #fff;
+    }
+  }
+
+  .top-menu {
+    top: 0;
+
+    nav.back {
+      float: left;
+      z-index: 999;
+    }
+
+    nav.actions {
+      float: right;
+    }
+  }
+
+  .bottom-menu {
+    bottom: 0;
+
+    .location {
+      float: left;
+    }
+
+    .date {
+      float: right;
+    }
+  }
+}
+
+.item-component.overlay {
+  .item-menu-component {
+    .top-menu, .bottom-menu {
+      color: rgba(200, 200, 200, 0.5);
+
+      a {
+        color: rgba(255, 255, 255, 0.5);
+
+        &:hover {
+          color: #fff;
+        }
+      }
+    }
+  }
+}
