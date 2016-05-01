@@ -11,10 +11,15 @@ export default class LazyImage extends React.Component {
 
   componentDidMount() {
     this.updateShownState = () => {
-      this.setState({
-        shown: this.isShown()
-      })
+      if (this.isShown()) {
+        window.removeEventListener('scroll', this.updateShownState)
+
+        this.setState({
+          shown: true
+        })
+      }
     }
+
     window.addEventListener('scroll', this.updateShownState)
     this.updateShownState()
   }
@@ -24,20 +29,21 @@ export default class LazyImage extends React.Component {
   }
 
   isShown() {
-    if (this.state.shown) {
-      return true
+    if (!this.element) {
+      this.element = findDOMNode(this)
+      if (!this.element) {
+        return false
+      }
     }
 
-    const element = findDOMNode(this)
-    if (!element) {
-      return false
+    if (!this.triggerPoint) {
+      const rect = this.element.getBoundingClientRect()
+      // we multiply the height by 2 so hopefully images can be loaded before
+      // they are scrolled into view
+      this.triggerPoint = rect.top - (rect.height * 2)
     }
 
-    const rect = element.getBoundingClientRect()
-    const height = rect.bottom - rect.top
-    // we multiply the height by 2 so hopefully images can be loaded before
-    // they are scrolled into view
-    const visible = rect.bottom - height <= (window.innerHeight || document.documentElement.clientHeight) * 2
+    const visible = (document.body.scrollTop + window.innerHeight) >= this.triggerPoint
     return visible
   }
 

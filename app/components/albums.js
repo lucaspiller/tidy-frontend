@@ -4,6 +4,7 @@ import { Link } from 'react-router'
 import { fetchAlbumsIfNeeded } from '../ducks/albums'
 import { albumsGroupedByYear } from '../selectors/albums'
 import LazyImage from './lazy_image'
+import StickyHeader from './sticky_header'
 import moment from 'moment'
 
 export default class Albums extends React.Component {
@@ -15,15 +16,9 @@ export default class Albums extends React.Component {
   render() {
     return (
       <div className="albums-component">
-        <h1>Albums</h1>
-
         <div className="album-list">
           {this.props.albumsByYear.map(this.renderYear.bind(this))}
         </div>
-
-        <p>
-          {this.props.albums.length} album(s)
-        </p>
       </div>
     )
   }
@@ -38,9 +33,21 @@ export default class Albums extends React.Component {
 
   renderYear(yearAlbums, i) {
     const { year, albums } = yearAlbums
+    const albumsCount = albums.length
+
+    let itemsCount = 0
+    albums.map((album) => {
+      itemsCount += album.itemsCount
+    })
+
     return (
       <div className="year" key={i}>
-        <h1>{year}</h1>
+        <StickyHeader>
+          <h1>{year}</h1>
+          {albumsCount} albums
+          &nbsp;&bull;&nbsp;
+          {itemsCount} items
+        </StickyHeader>
         <div className="albums">
           {albums.map(this.renderAlbum.bind(this))}
         </div>

@@ -6,10 +6,23 @@ import chunk from 'lodash/chunk'
 import { fetchSelectedAlbumIfNeeded } from '../ducks/selectedAlbum'
 import { itemsSortedByDate } from '../selectors/items'
 import LazyImage from './lazy_image'
+import StickyHeader from './sticky_header'
+import moment from 'moment'
 
 export default class Album extends React.Component {
   itemUrl(albumId, item) {
     return `/albums/${albumId}/items/${item.id}`
+  }
+
+  formatDates(minDate, maxDate) {
+    minDate = moment(this.props.album.minDate).format('MMMM YYYY')
+    maxDate = moment(this.props.album.maxDate).format('MMMM YYYY')
+
+    if (minDate == maxDate) {
+      return minDate
+    } else {
+      return `${minDate} - ${maxDate}`
+    }
   }
 
   componentDidMount() {
@@ -32,19 +45,26 @@ export default class Album extends React.Component {
   render() {
     const { name } = this.props.album
     const items = this.props.items
+    const dates = this.formatDates()
+    const itemsCount = items.length
     const _this = this
 
     return (
       <div className="album-component">
-        <h1>{name}</h1>
+        <StickyHeader>
+          <h1>{name}</h1>
+
+          <span>
+            {dates}
+            &nbsp;&bull;&nbsp;
+            {itemsCount} items
+          </span>
+        </StickyHeader>
 
         <div className="item-list">
           {chunk(items, 500).map(function(chunk) { return _this.renderItems(chunk) })}
+          <div className="clearfix" />
         </div>
-
-        <p>
-          {items.length} items(s)
-        </p>
       </div>
     )
   }
@@ -55,8 +75,9 @@ export default class Album extends React.Component {
     }
 
     const defaultRatio = 1
+    const itemListPadding = 40
 
-    const viewportWidth = window.innerWidth
+    const viewportWidth = window.innerWidth - itemListPadding
     const idealHeight = Math.ceil(window.innerHeight / 3.5)
     const summedWidth = items.reduce((sum, item) => {
       return sum + item.aspectRatio * idealHeight

@@ -32,10 +32,8 @@ export default function reducer(state = initialState, action) {
         isFetching:    false,
         didInvalidate: false,
         id:            action.id,
-        name:          action.name,
-        items:         action.items,
         lastUpdated:   action.receivedAt
-      })
+      }, action.album)
     default:
       return state
   }
@@ -59,8 +57,7 @@ function receiveAlbum(json) {
   return {
     type:       RECEIVE,
     id:         json.album.id,
-    name:       json.album.name,
-    items:      json.album.items,
+    album:      json.album,
     receivedAt: Date.now()
   }
 }
