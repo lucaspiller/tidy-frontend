@@ -1,5 +1,6 @@
 import React from 'react'
 import { findDOMNode } from 'react-dom'
+import throttle from 'lodash/throttle'
 
 export default class LazyImage extends React.Component {
   constructor(props) {
@@ -10,7 +11,7 @@ export default class LazyImage extends React.Component {
   }
 
   componentDidMount() {
-    this.updateShownState = () => {
+    this.updateShownState = throttle(() => {
       if (this.isShown()) {
         window.removeEventListener('scroll', this.updateShownState)
 
@@ -18,7 +19,7 @@ export default class LazyImage extends React.Component {
           shown: true
         })
       }
-    }
+    }, 50)
 
     window.addEventListener('scroll', this.updateShownState)
     this.updateShownState()
@@ -40,7 +41,7 @@ export default class LazyImage extends React.Component {
       const rect = this.element.getBoundingClientRect()
       // we multiply the height by 2 so hopefully images can be loaded before
       // they are scrolled into view
-      this.triggerPoint = rect.top - (rect.height * 2)
+      this.triggerPoint = rect.top - (rect.height * 2) + document.body.scrollTop
     }
 
     const visible = (document.body.scrollTop + window.innerHeight) >= this.triggerPoint

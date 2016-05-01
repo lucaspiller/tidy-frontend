@@ -1,5 +1,6 @@
 import React from 'react'
 import { findDOMNode } from 'react-dom'
+import throttle from 'lodash/throttle'
 
 export default class StickyHeader extends React.Component {
   constructor(props) {
@@ -10,14 +11,14 @@ export default class StickyHeader extends React.Component {
   }
 
   componentDidMount() {
-    this.updateStickyState = () => {
+    this.updateStickyState = throttle(() => {
       const sticky = this.isSticky()
       if (sticky != this.state.sticky) {
         this.setState({
           sticky: sticky
         })
       }
-    }
+    }, 50)
 
     window.addEventListener('scroll', this.updateStickyState)
     this.updateStickyState()
@@ -36,7 +37,7 @@ export default class StickyHeader extends React.Component {
     }
 
     if (!this.triggerPoint) {
-      this.triggerPoint = this.element.getBoundingClientRect().top
+      this.triggerPoint = this.element.getBoundingClientRect().top + document.body.scrollTop
     }
 
     const sticky = document.body.scrollTop >= this.triggerPoint

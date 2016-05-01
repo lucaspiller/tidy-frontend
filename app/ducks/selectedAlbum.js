@@ -1,4 +1,5 @@
 import fetch from 'isomorphic-fetch'
+import union from 'lodash/union'
 
 const RESET   = 'selectedAlbum/RESET'
 const REQUEST = 'selectedAlbum/REQUEST'
@@ -13,14 +14,14 @@ const initialState = {
 export default function reducer(state = initialState, action) {
   switch (action.type) {
     case RESET:
-      return Object.assign({}, state, {
+      return {
         isFetching:    false,
         didInvalidate: true,
         id:            action.id,
-        name:          undefined,
         items:         [],
+        nextPageUrl:   `/api/albums/${action.id}`,
         lastUpdated:   undefined
-      })
+      }
     case REQUEST:
       return Object.assign({}, state, {
         isFetching:    true,
@@ -32,8 +33,11 @@ export default function reducer(state = initialState, action) {
         isFetching:    false,
         didInvalidate: false,
         id:            action.id,
+        nextPageUrl:   action.nextPageUrl,
         lastUpdated:   action.receivedAt
-      }, action.album)
+      }, action.album, {
+        items: union(state.items, action.album.items)
+      })
     default:
       return state
   }
@@ -55,17 +59,18 @@ function requestAlbum(id) {
 
 function receiveAlbum(json) {
   return {
-    type:       RECEIVE,
-    id:         json.album.id,
-    album:      json.album,
-    receivedAt: Date.now()
+    type:        RECEIVE,
+    id:          json.album.id,
+    album:       json.album,
+    nextPageUrl: json.nextPageUrl,
+    receivedAt:  Date.now()
   }
 }
 
-function fetchAlbum(id) {
+function fetchAlbum(id, nextPageUrl) {
   return dispatch => {
     dispatch(requestAlbum(id))
-    return fetch(`/api/albums/${id}`)
+    return fetch(nextPageUrl)
       .then(response => response.json())
       .then(json => dispatch(receiveAlbum(json)))
   }
@@ -76,7 +81,7 @@ function shouldResetAlbum(state, id) {
   return (album && album.id != id)
 }
 
-function shouldFetchAlbum(state, id) {
+function shouldFetchAlbum(state, id, fetchNextPage) {
   const album = state.selectedAlbum
   if (!album) {
     return true
@@ -84,20 +89,25 @@ function shouldFetchAlbum(state, id) {
     return true
   } else if (album.isFetching) {
     return false
+  } else if (fetchNextPage) {
+    return true
   } else {
     return album.didInvalidate
   }
 }
 
-export function fetchSelectedAlbumIfNeeded(id) {
+export function fetchSelectedAlbumIfNeeded(id, fetchNextPage) {
   id = parseInt(id)
   return (dispatch, getState) => {
     if (shouldResetAlbum(getState(), id)) {
       dispatch(resetAlbum(id))
     }
 
-    if (shouldFetchAlbum(getState(), id)) {
-      dispatch(fetchAlbum(id))
+    if (shouldFetchAlbum(getState(), id, fetchNextPage)) {
+      const {
+        nextPageUrl = `/api/albums/${id}`
+      } = getState().selectedAlbum
+      dispatch(fetchAlbum(id, nextPageUrl))
     }
   }
 }

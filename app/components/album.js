@@ -7,6 +7,7 @@ import { fetchSelectedAlbumIfNeeded } from '../ducks/selectedAlbum'
 import { itemsSortedByDate } from '../selectors/items'
 import LazyImage from './lazy_image'
 import StickyHeader from './sticky_header'
+import InfiniteScrollList from './infinite_scroll_list'
 import moment from 'moment'
 
 export default class Album extends React.Component {
@@ -42,12 +43,18 @@ export default class Album extends React.Component {
     window.removeEventListener('resize', this.resize)
   }
 
+  handleLoadMore() {
+    const albumId = this.props.params.albumId
+    const { dispatch } = this.props
+    dispatch(fetchSelectedAlbumIfNeeded(albumId, true))
+  }
+
   render() {
-    const { name } = this.props.album
-    const items = this.props.items
-    const dates = this.formatDates()
-    const itemsCount = items.length
-    const _this = this
+    const { name }   = this.props.album
+    const items      = this.props.items
+    const dates      = this.formatDates()
+    const itemsCount = this.props.album.itemsCount
+    const _this      = this
 
     return (
       <div className="album-component">
@@ -61,10 +68,10 @@ export default class Album extends React.Component {
           </span>
         </StickyHeader>
 
-        <div className="item-list">
-          {chunk(items, 500).map(function(chunk) { return _this.renderItems(chunk) })}
+        <InfiniteScrollList onLoadMore={_this.handleLoadMore.bind(_this)} className="item-list">
+          {chunk(items, 100).map(function(chunk) { return _this.renderItems(chunk) })}
           <div className="clearfix" />
-        </div>
+        </InfiniteScrollList>
       </div>
     )
   }
