@@ -5,6 +5,7 @@ import { fetchAlbumsIfNeeded } from '../ducks/albums'
 import { albumsGroupedByYear } from '../selectors/albums'
 import LazyImage from './lazy_image'
 import StickyHeader from './sticky_header'
+import InfiniteScrollList from './infinite_scroll_list'
 import moment from 'moment'
 
 export default class Albums extends React.Component {
@@ -13,12 +14,19 @@ export default class Albums extends React.Component {
     dispatch(fetchAlbumsIfNeeded())
   }
 
+  handleLoadMore() {
+    const albumId = this.props.params.albumId
+    const { dispatch } = this.props
+    dispatch(fetchAlbumsIfNeeded(true))
+  }
+
   render() {
+    const _this = this
     return (
       <div className="albums-component">
-        <div className="album-list">
+        <InfiniteScrollList onLoadMore={_this.handleLoadMore.bind(_this)} className="album-list">
           {this.props.albumsByYear.map(this.renderYear.bind(this))}
-        </div>
+        </InfiniteScrollList>
       </div>
     )
   }

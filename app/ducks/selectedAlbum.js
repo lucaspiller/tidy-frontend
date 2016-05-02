@@ -19,7 +19,6 @@ export default function reducer(state = initialState, action) {
         didInvalidate: true,
         id:            action.id,
         items:         [],
-        nextPageUrl:   `/api/albums/${action.id}`,
         lastUpdated:   undefined
       }
     case REQUEST:

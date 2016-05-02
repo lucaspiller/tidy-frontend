@@ -1,4 +1,5 @@
 import fetch from 'isomorphic-fetch'
+import union from 'lodash/union'
 
 const REQUEST = 'albums/REQUEST'
 const RECEIVE = 'albums/RECEIVE'
@@ -20,7 +21,8 @@ export default function reducer(state = initialState, action) {
       return Object.assign({}, state, {
         isFetching:    false,
         didInvalidate: false,
-        albums:        action.albums,
+        albums:        union(state.albums, action.albums),
+        nextPageUrl:   action.nextPageUrl,
         lastUpdated:   action.receivedAt
       })
     default:
@@ -38,34 +40,40 @@ function receiveAlbums(json) {
   return {
     type: RECEIVE,
     albums: json.albums,
+    nextPageUrl: json.nextPageUrl,
     receivedAt: Date.now()
   }
 }
 
-function fetchAlbums() {
+function fetchAlbums(nextPageUrl) {
   return dispatch => {
     dispatch(requestAlbums())
-    return fetch(`/api/albums`)
+    return fetch(nextPageUrl)
       .then(response => response.json())
       .then(json => dispatch(receiveAlbums(json)))
   }
 }
 
-function shouldFetchAlbums(state) {
+function shouldFetchAlbums(state, fetchNextPage) {
   const albums = state.albums
   if (!albums) {
     return true
   } else if (albums.isFetching) {
     return false
+  } else if (fetchNextPage) {
+    return true
   } else {
     return albums.didInvalidate
   }
 }
 
-export function fetchAlbumsIfNeeded() {
+export function fetchAlbumsIfNeeded(fetchNextPage) {
   return (dispatch, getState) => {
-    if (shouldFetchAlbums(getState())) {
-      return dispatch(fetchAlbums())
+    if (shouldFetchAlbums(getState(), fetchNextPage)) {
+      const {
+        nextPageUrl = `/api/albums`
+      } = getState().albums
+      dispatch(fetchAlbums(nextPageUrl))
     }
   }
 }
