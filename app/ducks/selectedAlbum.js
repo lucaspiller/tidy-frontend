@@ -8,19 +8,16 @@ const RECEIVE = 'selectedAlbum/RECEIVE'
 const initialState = {
   isFetching:    false,
   didInvalidate: true,
+  morePages:     true,
   items:         []
 }
 
 export default function reducer(state = initialState, action) {
   switch (action.type) {
     case RESET:
-      return {
-        isFetching:    false,
-        didInvalidate: true,
-        id:            action.id,
-        items:         [],
-        lastUpdated:   undefined
-      }
+      return Object.assign({}, initialState, {
+        id: action.id
+      })
     case REQUEST:
       return Object.assign({}, state, {
         isFetching:    true,
@@ -31,6 +28,7 @@ export default function reducer(state = initialState, action) {
       return Object.assign({}, state, {
         isFetching:    false,
         didInvalidate: false,
+        morePages:     action.morePages,
         id:            action.id,
         nextPageUrl:   action.nextPageUrl,
         lastUpdated:   action.receivedAt
@@ -62,6 +60,7 @@ function receiveAlbum(json) {
     id:          json.album.id,
     album:       json.album,
     nextPageUrl: json.nextPageUrl,
+    morePages:   json.album.items.length > 0,
     receivedAt:  Date.now()
   }
 }
@@ -88,7 +87,7 @@ function shouldFetchAlbum(state, id, fetchNextPage) {
     return true
   } else if (album.isFetching) {
     return false
-  } else if (fetchNextPage) {
+  } else if (fetchNextPage && album.morePages) {
     return true
   } else {
     return album.didInvalidate
