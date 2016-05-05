@@ -3,12 +3,26 @@ import { connect } from 'react-redux'
 import { Link } from 'react-router'
 import { fetchSelectedItemIfNeeded } from '../ducks/selectedItem'
 import ItemMenu from './item_menu'
+import ImageLoader from './image_loader'
 
 export default class Item extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {}
+  }
+
   componentDidMount() {
     const { dispatch } = this.props
     const itemId = this.props.params.itemId
     dispatch(fetchSelectedItemIfNeeded(itemId))
+
+    const { item } = this.props
+    this.computeFullSize(item)
+  }
+
+  componentWillReceiveProps(props, _state) {
+    const { item } = props
+    this.computeFullSize(item)
   }
 
   returnUrl() {
@@ -22,7 +36,7 @@ export default class Item extends React.Component {
     return `/albums/${albumId}/items/${itemId}/info`
   }
 
-  imgSrc(item) {
+  computeFullSize(item) {
     if (item.metadata && item.metadata.width && item.metadata.height) {
       const imageWidth  = item.metadata.width
       const imageHeight = item.metadata.height
@@ -41,15 +55,25 @@ export default class Item extends React.Component {
       const width  = imageWidth * scaleFactor
       const height = imageHeight * scaleFactor
 
-      return `/api/items/${item.id}/full?width=${width}&height=${height}`
-    } else {
-      return `/api/items/${item.id}/thumb`
+      this.setState({
+        width:  width,
+        height: height
+      })
     }
   }
 
+  fullSrc() {
+    if (this.state.width && this.state.height) {
+      return `/api/items/${this.props.item.id}/full?width=${this.state.width}&height=${this.state.height}`
+    }
+  }
+
+  thumbnailSrc() {
+    return `/api/items/${this.props.item.id}/thumb`
+  }
+
   render() {
-    const item = this.props.item
-    const src  = this.imgSrc(item)
+    const item      = this.props.item
     const returnUrl = this.returnUrl()
     const infoUrl   = this.infoUrl()
 
@@ -58,10 +82,13 @@ export default class Item extends React.Component {
       className += " overlay"
     }
 
+    const thumbnailSrc = this.thumbnailSrc()
+    const fullSrc      = this.fullSrc()
+
     return (
       <div className={className}>
         <div id="item">
-          <img src={src} />
+          <ImageLoader thumbnailSrc={thumbnailSrc} fullSrc={fullSrc} width={this.state.width} height={this.state.height} />
         </div>
         <ItemMenu
           item={item}
