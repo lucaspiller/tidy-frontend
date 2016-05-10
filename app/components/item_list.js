@@ -28,23 +28,37 @@ export default class ItemList extends React.Component {
     }, 0)
     const rows = Math.ceil(summedWidth / viewportWidth)
 
-    const weights = this.props.items.map((item) => {
-      return item.aspectRatio || defaultRatio
-    })
-
-    const partitions = partition(weights, rows)
-
-    let index = 0
-    return partitions.map((row) => {
-      const summedRatio = row.reduce((sum, ratio) => sum + ratio)
-      return row.map(() => {
-        const item = this.props.items[index++]
+    if (rows == 1) {
+      // There is only 1 row, so render everything at the ideal height
+      return this.props.items.map((item, index) => {
         const ratio = item.aspectRatio || defaultRatio
-        const width = (viewportWidth / summedRatio) * ratio
-        const height = width / ratio
+        const height = idealHeight
+        const width = height * ratio
+
         return this.renderItem(item, index, width, height)
       })
-    })
+    } else {
+      // Otherwise figure out the optimal partition sizes and render
+      const weights = this.props.items.map((item) => {
+        return item.aspectRatio || defaultRatio
+      })
+
+      const partitions = partition(weights, rows)
+
+      let index = 0
+      return partitions.map((row) => {
+        const summedRatio = row.reduce((sum, ratio) => sum + ratio)
+        return row.map(() => {
+          const item  = this.props.items[index++]
+          const ratio = item.aspectRatio || defaultRatio
+
+          const height = viewportWidth / summedRatio
+          const width = height * ratio
+
+          return this.renderItem(item, index, width, height)
+        })
+      })
+    }
   }
 
   renderItem(item, i, width, height) {

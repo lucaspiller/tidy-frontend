@@ -30,6 +30,10 @@ export function itemsGroupedByDate(items) {
     const itemDate = new Date(item.sortDate).setHours(0,0,0,0)
 
     if (dateAlbum == undefined || dateAlbum.date != itemDate) {
+      if (dateAlbum) {
+        dateAlbum.items = dateAlbum.items.reverse()
+      }
+
       dateAlbum = {
         date:  itemDate,
         items: []
