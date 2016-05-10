@@ -1,17 +1,17 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { Link } from 'react-router'
-import partition from 'linear-partitioning'
 import chunk from 'lodash/chunk'
 import { fetchSelectedAlbumIfNeeded } from '../ducks/selectedAlbum'
 import { itemsSortedByDate } from '../selectors/items'
-import LazyImage from './lazy_image'
+import ItemList from './item_list'
 import StickyHeader from './sticky_header'
 import InfiniteScrollList from './infinite_scroll_list'
 import moment from 'moment'
 
 export default class Album extends React.Component {
-  itemUrl(albumId, item) {
+  itemUrl(item) {
+    const albumId = this.props.album.id
     return `/albums/${albumId}/items/${item.id}`
   }
 
@@ -69,61 +69,16 @@ export default class Album extends React.Component {
         </StickyHeader>
 
         <InfiniteScrollList onLoadMore={_this.handleLoadMore.bind(_this)} className="item-list">
-          {chunk(items, 100).map(function(chunk) { return _this.renderItems(chunk) })}
+          {chunk(items, 100).map(function(chunk, index) { return _this.renderItems(chunk, index) })}
           <div className="clearfix" />
         </InfiniteScrollList>
       </div>
     )
   }
 
-  renderItems(items) {
-    if (items.length == 0) {
-      return
-    }
-
-    const defaultRatio = 1
-    const itemListPadding = 40
-
-    const viewportWidth = window.innerWidth - itemListPadding
-    const idealHeight = Math.ceil(window.innerHeight / 3.5)
-    const summedWidth = items.reduce((sum, item) => {
-      return sum + item.aspectRatio * idealHeight
-    }, 0)
-    const rows = Math.ceil(summedWidth / viewportWidth)
-
-    const weights = items.map((item) => {
-      return item.aspectRatio || defaultRatio
-    })
-
-    const partitions = partition(weights, rows)
-
-    let index = 0
-    return partitions.map((row) => {
-      const summedRatio = row.reduce((sum, ratio) => sum + ratio)
-      return row.map(() => {
-        const item = items[index++]
-        const ratio = item.aspectRatio || defaultRatio
-        const width = (viewportWidth / summedRatio) * ratio
-        const height = width / ratio
-        return this.renderItem(item, index, width, height)
-      })
-    })
-  }
-
-  renderItem(item, i, width, height) {
-    const albumId      = this.props.album.id
-    const url          = this.itemUrl(albumId, item)
-    const thumbnailUrl = item.thumbnailUrl
-    const style = {
-      width: width,
-      height: height
-    }
+  renderItems(items, index) {
     return (
-      <div className="item" key={i} style={style}>
-        <Link to={url}>
-          <LazyImage src={thumbnailUrl} />
-        </Link>
-      </div>
+      <ItemList key={index} items={items} urlFn={this.itemUrl.bind(this)} />
     )
   }
 }

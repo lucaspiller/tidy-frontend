@@ -11,3 +11,35 @@ export function itemsSortedByDate(items, ascending = true) {
     }
   })
 }
+
+// Sorts and groups items by date. Returns newest date first.
+//
+// [
+//   {
+//     date:  Date(2015-01-01),
+//     items: [ ... ]
+//   },
+//   ...
+// ]
+//
+export function itemsGroupedByDate(items) {
+  let dates = []
+  let dateAlbum
+
+  itemsSortedByDate(items).forEach(function(item) {
+    const itemDate = new Date(item.sortDate).setHours(0,0,0,0)
+
+    if (dateAlbum == undefined || dateAlbum.date != itemDate) {
+      dateAlbum = {
+        date:  itemDate,
+        items: []
+      }
+
+      dates.push(dateAlbum)
+    }
+
+    dateAlbum.items.push(item)
+  })
+
+  return dates.reverse()
+}

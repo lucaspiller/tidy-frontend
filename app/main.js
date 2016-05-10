@@ -8,6 +8,7 @@ import Albums from './components/albums'
 import Album from './components/album'
 import Item from './components/item'
 import ItemInfo from './components/item_info'
+import Items from './components/items'
 
 const store = configureStore()
 
@@ -17,6 +18,7 @@ export class Home extends React.Component {
       <div>
         <h1>Home</h1>
         <Link to='/albums'>Albums</Link>
+        <Link to='/items'>Items</Link>
       </div>
     );
   }
@@ -31,6 +33,7 @@ ReactDOM.render((
       <Route path="/albums/:albumId/items/:itemId" component={Item}>
         <Route path="info" component={ItemInfo} />
       </Route>
+      <Route path="/items" component={Items} />
     </Router>
   </Provider>
 ), document.getElementById('app'))
