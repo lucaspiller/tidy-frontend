@@ -55,8 +55,7 @@ export default class Items extends React.Component {
   }
 
   formatDate(date) {
-    const m = moment(date)
-    return m.format('MMMM Do YYYY')
+    return moment(date).format('Do MMMM YYYY')
   }
 }
 

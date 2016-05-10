@@ -1,3 +1,5 @@
+@import 'base/variables';
+
 .items-component {
   .item-list {
     .date {
@@ -5,30 +7,18 @@
       position: relative;
 
       > header {
-        margin-top: 50px;
-        height: 100px;
-        text-align: center;
+        margin-top: 30px;
+        margin-left: 25px;
+        text-align: left;
 
-        .content.sticky {
-          position: fixed;
-          top: 0px;
-          width: 100%;
-          padding: 10px;
-
-          background-color: #fff;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3px);
-          z-index: 999;
-
-          h1 {
-            display: inline;
-            font-size: $font-size-root;
-            margin-right: 0.5em;
-          }
+        h1 {
+          font-size: $font-size-h4;
         }
       }
 
       .items {
         margin: 20px;
+        margin-top: 0;
 
         .item {
           float: left;

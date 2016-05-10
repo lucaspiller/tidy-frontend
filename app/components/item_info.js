@@ -13,7 +13,7 @@ export default class ItemInfo extends React.Component {
 
   takenOn(timestamp) {
     if (timestamp) {
-      return moment(timestamp).format("MMMM Do YYYY")
+      return moment(timestamp).format("Do MMMM YYYY")
     }
   }
 
